@@ -1,10 +1,11 @@
 // -*-c++-*-
 
 // --------------------------------------------------------------
-//
-// Jordi Bataller i Mascarell
-// 2019-07-07
-//
+// Autor: Ruiyu Chen 
+// Descripción: Este fichero inicialmente configura la placa y 
+// la inicializa, recibe los valores de CO2 y temperatura desde
+// varios sensores, y emite un beacon, tal como se puede enviar
+// mensaje que quiera
 // --------------------------------------------------------------
 
 // https://learn.sparkfun.com/tutorials/nrf52840-development-with-arduino-and-circuitpython
@@ -15,8 +16,8 @@
 // --------------------------------------------------------------
 #include <bluefruit.h>
 
-#undef min // vaya tela, están definidos en bluefruit.h y  !
-#undef max // colisionan con los de la biblioteca estándar
+#undef min //Indefinir el valor maximo y minimo  
+#undef max 
 
 // --------------------------------------------------------------
 // --------------------------------------------------------------
@@ -31,7 +32,6 @@ namespace Globales {
 
   PuertoSerie elPuerto ( /* velocidad = */ 115200 ); // 115200 o 9600 o ...
 
-  // Serial1 en el ejemplo de Curro creo que es la conexión placa-sensor 
 };
 
 // --------------------------------------------------------------
@@ -96,18 +96,19 @@ void setup() {
 } // setup ()
 
 // --------------------------------------------------------------
+// Encender y apagar la lucecita cada cierto tiempo
 // --------------------------------------------------------------
 inline void lucecitas() {
   using namespace Globales;
 
-  elLED.brillar( 100 ); // 100 encendido
-  esperar ( 400 ); //  100 apagado
-  elLED.brillar( 100 ); // 100 encendido
-  esperar ( 400 ); //  100 apagado
-  Globales::elLED.brillar( 100 ); // 100 encendido
-  esperar ( 400 ); //  100 apagado
-  Globales::elLED.brillar( 1000 ); // 1000 encendido
-  esperar ( 1000 ); //  100 apagado
+  elLED.brillar( 100 ); 
+  esperar ( 400 ); 
+  elLED.brillar( 100 ); 
+  esperar ( 400 );  
+  Globales::elLED.brillar( 100 ); 
+  esperar ( 400 ); 
+  Globales::elLED.brillar( 1000 ); 
+  esperar ( 1000 ); 
 } // ()
 
 // --------------------------------------------------------------
