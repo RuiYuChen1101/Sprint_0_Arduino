@@ -2,10 +2,9 @@
 
 // --------------------------------------------------------------
 // Autor: Ruiyu Chen 
-// Descripción: Este fichero inicialmente configura la placa y 
-// la inicializa, recibe los valores de CO2 y temperatura desde
-// varios sensores, y emite un beacon, tal como se puede enviar
-// mensaje que quiera
+// Descripción: Inicialmente configura la placa y la inicializa,
+// coge los valores de CO2 y temperatura desde varios sensores
+// y comienza el proceso del envío de Beacon, o cualquier mensaje
 // --------------------------------------------------------------
 
 // https://learn.sparkfun.com/tutorials/nrf52840-development-with-arduino-and-circuitpython
@@ -49,18 +48,18 @@ namespace Globales {
 
   Medidor elMedidor;
 
-}; // namespace
+};
 
 // --------------------------------------------------------------
 // --------------------------------------------------------------
 void inicializarPlaquita () {
 
-  // de momento nada
+  
 
 } // ()
 
 // --------------------------------------------------------------
-// setup()
+// setup() 
 // --------------------------------------------------------------
 void setup() {
 
@@ -131,28 +130,14 @@ void loop () {
   elPuerto.escribir( cont );
   elPuerto.escribir( "\n" );
 
-
   lucecitas();
 
-  // 
-  // mido y publico
-  // 
   int valorCO2 = elMedidor.medirCO2();
+  elPublicador.publicarCO2( valorCO2, cont, 1000);
   
-  elPublicador.publicarCO2( valorCO2,
-							cont,
-							1000 // intervalo de emisión
-							);
   
-  // 
-  // mido y publico
-  // 
-  int valorTemperatura = elMedidor.medirTemperatura();
-  
-  elPublicador.publicarTemperatura( valorTemperatura, 
-									cont,
-									1000 // intervalo de emisión
-									);
+  int valorTemperatura = elMedidor.medirTemperatura();  
+  elPublicador.publicarTemperatura( valorTemperatura, cont, 1000);
 
   // 
   // prueba para emitir un iBeacon y poner
@@ -161,6 +146,7 @@ void loop () {
   // 
   // Al terminar la prueba hay que hacer Publicador::laEmisora privado
   // 
+
   char datos[21] = {
 	'H', 'o', 'l', 'a',
 	'H', 'o', 'l', 'a',
@@ -170,12 +156,12 @@ void loop () {
 	'H'
   };
 
-  // elPublicador.laEmisora.emitirAnuncioIBeaconLibre ( &datos[0], 21 );
-  elPublicador.laEmisora.emitirAnuncioIBeaconLibre ( "MolaMolaMolaMolaMolaM", 21 );
+  //elPublicador.laEmisora.emitirAnuncioIBeaconLibre ( &datos[0], 21 );
+  //elPublicador.laEmisora.emitirAnuncioIBeaconLibre ( "MolaMolaMolaMolaMolaM", 21 );
 
-  esperar( 2000 );
+  //esperar( 2000 );
 
-  elPublicador.laEmisora.detenerAnuncio();
+  //elPublicador.laEmisora.detenerAnuncio();
   
   // 
   // 
@@ -184,8 +170,5 @@ void loop () {
   elPuerto.escribir( cont );
   elPuerto.escribir( "\n" );
   
-} // loop ()
-// --------------------------------------------------------------
-// --------------------------------------------------------------
-// --------------------------------------------------------------
-// --------------------------------------------------------------
+} 
+

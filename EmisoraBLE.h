@@ -1,8 +1,9 @@
 // -*- mode: c++ -*-
 
 // ----------------------------------------------------------
-// Jordi Bataller i Mascarell
-// 2019-07-07
+// Autor: Ruiyu Chen 
+// Descripción: Configura la cabecera del beacon, añadiendo la
+// carga y comienza el envío del anuncio
 // ----------------------------------------------------------
 #ifndef EMISORA_H_INCLUIDO
 #define EMISORA_H_INCLUIDO
@@ -31,26 +32,20 @@ private:
 
 public:
 
-  // .........................................................
-  // .........................................................
   using CallbackConexionEstablecida = void ( uint16_t connHandle );
   using CallbackConexionTerminada = void ( uint16_t connHandle, uint8_t reason);
 
-  // .........................................................
-  // .........................................................
-  EmisoraBLE( const char * nombreEmisora_, const uint16_t fabricanteID_,
-			  const int8_t txPower_ ) 
-	:
-	nombreEmisora( nombreEmisora_ ) ,
-	fabricanteID( fabricanteID_ ) ,
-	txPower( txPower_ )
+  EmisoraBLE( const char * nombreEmisora_, const uint16_t fabricanteID_, const int8_t txPower_ ):
+	nombreEmisora( nombreEmisora_ ) , 	
+  fabricanteID( fabricanteID_ ) ,	
+  txPower( txPower_ )
   {
 	// no encender ahora la emisora, tal vez sea por el println()
 	// que hace que todo falle si lo llamo en el contructor
 	// ( = antes que configuremos Serial )
 	// No parece que sea por el println,
 	// por tanto NO_encenderEmisora();
-  } // ()
+  } 
 
   // .........................................................
   // .........................................................
@@ -71,6 +66,9 @@ public:
   */
 	
   // .........................................................
+  // Diseño: encenderEmisora()
+  // Descripción: Encender el bluetooth de la placa, y por si acaso
+  // detener el anuncio si está enviando algo
   // .........................................................
   void encenderEmisora() {
 	// Serial.println ( "Bluefruit.begin() " );
@@ -78,78 +76,65 @@ public:
 
 	 // por si acaso:
 	 (*this).detenerAnuncio();
-  } // ()
+  } 
 
   // .........................................................
+  // Diseño: N,N,N ---> encenderEmisora()
+  // Descripción: Encender el bluetooth de la placa y llamar las
+  // dos funciones para establecer conexion, en caso de fallo
+  // volverá a intentar otra vez
   // .........................................................
-  void encenderEmisora( CallbackConexionEstablecida cbce,
-						CallbackConexionTerminada cbct ) {
+  void encenderEmisora( CallbackConexionEstablecida cbce, CallbackConexionTerminada cbct ) {
 
 	encenderEmisora();
 
 	instalarCallbackConexionEstablecida( cbce );
 	instalarCallbackConexionTerminada( cbct );
-
-  } // ()
+  } 
 
   // .........................................................
+  // Diseño: detenerAnuncio()
+  // Descripción: Verifica si la emisora esta emitiendo anuncio,
+  // en caso de sí, pues se parará la emisión
   // .........................................................
   void detenerAnuncio() {
 
 	if ( (*this).estaAnunciando() ) {
 	  // Serial.println ( "Bluefruit.Advertising.stop() " );
 	  Bluefruit.Advertising.stop(); 
-	}
-
-  }  // ()
+	  }
+  }  
   
   // .........................................................
-  // estaAnunciando() -> Boleano
+  // Diseño: estaAnunciando() ---> Bool
+  // Descripción: Comprueba si la emisora esta enviando anuncios
   // .........................................................
   bool estaAnunciando() {
 	return Bluefruit.Advertising.isRunning();
   } // ()
 
   // .........................................................
+  // Diseño: N,N,N,N ---> emitirAnuncioIBeacon()
+  // Descripción: Recibe la carga de IBeacon, configura los 
+  // parametros de bluetooth y emite anuncios
   // .........................................................
   void emitirAnuncioIBeacon( uint8_t * beaconUUID, int16_t major, int16_t minor, uint8_t rssi ) {
 
-	//
-	//
-	//
 	(*this).detenerAnuncio();
 	
-	//
-	// creo el beacon 
-	//
-	BLEBeacon elBeacon( beaconUUID, major, minor, rssi );
+	BLEBeacon elBeacon( beaconUUID, major, minor, rssi ); //Crear el beacon
 	elBeacon.setManufacturer( (*this).fabricanteID );
 
-	//
-	// parece que esto debe ponerse todo aquí
-	//
+	Bluefruit.setTxPower( (*this).txPower ); //TxPower
+	Bluefruit.setName( (*this).nombreEmisora ); //NombreEmisora a la emisora
+	Bluefruit.ScanResponse.addName(); //NombreEmisora al paquete
 
-	Bluefruit.setTxPower( (*this).txPower );
-	Bluefruit.setName( (*this).nombreEmisora );
-	Bluefruit.ScanResponse.addName(); // para que envíe el nombre de emisora (?!)
+	Bluefruit.Advertising.setBeacon( elBeacon ); //Añade el beacon a la emisora
+	Bluefruit.Advertising.restartOnDisconnect(true); 
+	Bluefruit.Advertising.setInterval(32, 244);    // in unit of 0.625 ms
 
-	//
-	// pongo el beacon
-	//
-	Bluefruit.Advertising.setBeacon( elBeacon );
-
-	//
-	// ? qué valorers poner aquí
-	//
-	Bluefruit.Advertising.restartOnDisconnect(true); // no hace falta, pero lo pongo
-	Bluefruit.Advertising.setInterval(100, 100);    // in unit of 0.625 ms
-
-	//
-	// empieza el anuncio, 0 = tiempo indefinido (ya lo pararán)
-	//
-	Bluefruit.Advertising.start( 0 ); 
-	
-  } // ()
+	Bluefruit.Advertising.start( 0 ); 	
+  } 
 
   // .........................................................
   //
@@ -200,12 +185,18 @@ public:
 
 	const uint8_t tamanyoCarga = strlen( carga );
   */
+
+  // .........................................................
+  // Diseño: [String],N ---> emitirAnuncioIBeaconLibre()
+  // Descripción: Emite un IBeacon configurado con otros parametros
+  // propios
+  // .........................................................
   void emitirAnuncioIBeaconLibre( const char * carga, const uint8_t tamanyoCarga ) {
 
 	(*this).detenerAnuncio(); 
 
-	Bluefruit.Advertising.clearData();
-	Bluefruit.ScanResponse.clearData(); // hace falta?
+	Bluefruit.Advertising.clearData(); //Limpiar los datos del anuncio
+	Bluefruit.ScanResponse.clearData(); //Limpiar los datos de la respuesta del escaneo
 
 	// Bluefruit.setTxPower( (*this).txPower ); creo que no lo pongo porque es uno de los bytes de la parte de carga que utilizo
 	Bluefruit.setName( (*this).nombreEmisora );
@@ -249,12 +240,10 @@ public:
 	// ? qué valores poner aquí ?
 	//
 	Bluefruit.Advertising.restartOnDisconnect(true);
-	Bluefruit.Advertising.setInterval(100, 100);    // in unit of 0.625 ms
+	Bluefruit.Advertising.setInterval(32, 244);    // in unit of 0.625 ms
 
-	Bluefruit.Advertising.setFastTimeout( 1 );      // number of seconds in fast mode
-	//
-	// empieza el anuncio, 0 = tiempo indefinido (ya lo pararán)
-	//
+	Bluefruit.Advertising.setFastTimeout(30);      // number of seconds in fast mode
+	
 	Bluefruit.Advertising.start( 0 ); 
 
 	Globales::elPuerto.escribir( "emitiriBeacon libre  Bluefruit.Advertising.start( 0 );  \n");

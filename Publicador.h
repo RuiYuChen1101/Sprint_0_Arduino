@@ -1,7 +1,9 @@
 // -*- mode: c++ -*-
 
 // --------------------------------------------------------------
-// Jordi Bataller i Mascarell
+// Autor: Ruiyu Chen 
+// Descripción: Configura los parametros para el envío de Beacon
+// así como la carga del sí mismo
 // --------------------------------------------------------------
 
 #ifndef PUBLICADOR_H_INCLUIDO
@@ -11,8 +13,6 @@
 // --------------------------------------------------------------
 class Publicador {
 
-  // ............................................................
-  // ............................................................
 private:
 
   uint8_t beaconUUID[16] = { 
@@ -20,56 +20,46 @@ private:
 	'-', 'P', 'R', 'O', 'Y', '-', '3', 'A'
 	};
 
-  // ............................................................
-  // ............................................................
+  
 public:
   EmisoraBLE laEmisora {
 	"GTI-3A", //  nombre emisora
 	  0x004c, // fabricanteID (Apple)
 	  4 // txPower
 	  };
-  
-  const int RSSI = -53; // por poner algo, de momento no lo uso
 
-  // ............................................................
-  // ............................................................
+  const int RSSI = -53; 
+
+ 
 public:
 
-  // ............................................................
-  // ............................................................
   enum MedicionesID  {
 	CO2 = 11,
 	TEMPERATURA = 12,
 	RUIDO = 13
   };
 
-  // ............................................................
-  // ............................................................
   Publicador( ) {
-	// ATENCION: no hacerlo aquí. (*this).laEmisora.encenderEmisora();
-	// Pondremos un método para llamarlo desde el setup() más tarde
-  } // ()
+  } 
 
   // ............................................................
+  // Diseño: encenderEmisora()
+  // Descripción: Llama la función encenderEmisora() de la clase EmisoraBLE
   // ............................................................
   void encenderEmisora() {
 	(*this).laEmisora.encenderEmisora();
-  } // ()
+  } 
 
   // ............................................................
+  // Diseño: R,N,N ---> publicarCO2() 
+  // Descripción: Recibe parametros que constituye la carga de ibeacon,
+  // uuid y rssi son constantes, major es el numero combinado de la
+  // constante CO2 con contador, y minor es el valor de CO2 del sensor
   // ............................................................
-  void publicarCO2( int16_t valorCO2, uint8_t contador,
-					long tiempoEspera ) {
+  void publicarCO2( int16_t valorCO2, uint8_t contador, long tiempoEspera ) {
 
-	//
-	// 1. empezamos anuncio
-	//
 	uint16_t major = (MedicionesID::CO2 << 8) + contador;
-	(*this).laEmisora.emitirAnuncioIBeacon( (*this).beaconUUID, 
-											major,
-											valorCO2, // minor
-											(*this).RSSI // rssi
-									);
+	(*this).laEmisora.emitirAnuncioIBeacon( (*this).beaconUUID, major, valorCO2, (*this).RSSI);
 
 	/*
 	Globales::elPuerto.escribir( "   publicarCO2(): valor=" );
@@ -81,28 +71,22 @@ public:
 	Globales::elPuerto.escribir( "\n" );
 	*/
 
-	//
-	// 2. esperamos el tiempo que nos digan
-	//
 	esperar( tiempoEspera );
 
-	//
-	// 3. paramos anuncio
-	//
 	(*this).laEmisora.detenerAnuncio();
   } // ()
 
   // ............................................................
+  // Diseño: R,N,N ---> publicarTemperatura() 
+  // Descripción: Recibe parametros que constituye la carga de ibeacon,
+  // uuid y rssi son constantes, major es el numero combinado de la
+  // constante TEMPERATURA con contador, y minor es el valor de temperatura del sensor
   // ............................................................
-  void publicarTemperatura( int16_t valorTemperatura,
-							uint8_t contador, long tiempoEspera ) {
+  void publicarTemperatura( int16_t valorTemperatura,	uint8_t contador, long tiempoEspera ) {
 
 	uint16_t major = (MedicionesID::TEMPERATURA << 8) + contador;
-	(*this).laEmisora.emitirAnuncioIBeacon( (*this).beaconUUID, 
-											major,
-											valorTemperatura, // minor
-											(*this).RSSI // rssi
-									);
+	(*this).laEmisora.emitirAnuncioIBeacon( (*this).beaconUUID, major, valorTemperatura,	(*this).RSSI);
+
 	esperar( tiempoEspera );
 
 	(*this).laEmisora.detenerAnuncio();
