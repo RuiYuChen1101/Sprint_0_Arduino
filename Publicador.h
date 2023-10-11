@@ -1,15 +1,13 @@
-// -*- mode: c++ -*-
-
 // --------------------------------------------------------------
 // Autor: Ruiyu Chen 
-// Descripción: Configura los parametros para el envío de Beacon
-// así como la carga del sí mismo
+// Descripción: Configura los parametros del publicador para 
+// la publicación del ibeacon
 // --------------------------------------------------------------
 
 #ifndef PUBLICADOR_H_INCLUIDO
 #define PUBLICADOR_H_INCLUIDO
 
-// --------------------------------------------------------------
+// Constructor
 // --------------------------------------------------------------
 class Publicador {
 
@@ -23,14 +21,14 @@ private:
   
 public:
   EmisoraBLE laEmisora {
-	"GTI-3A", //  nombre emisora
-	  0x004c, // fabricanteID (Apple)
-	  4 // txPower
-	  };
+	"GTI-3A_CHEN", 
+	  0x004c, 
+	  4 
+	};
 
   const int RSSI = -53; 
 
- 
+// --------------------------------------------------------------
 public:
 
   enum MedicionesID  {
@@ -42,60 +40,43 @@ public:
   Publicador( ) {
   } 
 
-  // ............................................................
+  // --------------------------------------------------------------
   // Diseño: encenderEmisora()
   // Descripción: Llama la función encenderEmisora() de la clase EmisoraBLE
-  // ............................................................
+  // --------------------------------------------------------------
   void encenderEmisora() {
 	(*this).laEmisora.encenderEmisora();
   } 
 
-  // ............................................................
+  // --------------------------------------------------------------
   // Diseño: R,N,N ---> publicarCO2() 
-  // Descripción: Recibe parametros que constituye la carga de ibeacon,
-  // uuid y rssi son constantes, major es el numero combinado de la
-  // constante CO2 con contador, y minor es el valor de CO2 del sensor
-  // ............................................................
+  // Descripción: Recibe parametros para publicar el valor de co2
+  // --------------------------------------------------------------
   void publicarCO2( int16_t valorCO2, uint8_t contador, long tiempoEspera ) {
 
 	uint16_t major = (MedicionesID::CO2 << 8) + contador;
-	(*this).laEmisora.emitirAnuncioIBeacon( (*this).beaconUUID, major, valorCO2, (*this).RSSI);
 
-	/*
-	Globales::elPuerto.escribir( "   publicarCO2(): valor=" );
-	Globales::elPuerto.escribir( valorCO2 );
-	Globales::elPuerto.escribir( "   contador=" );
-	Globales::elPuerto.escribir( contador );
-	Globales::elPuerto.escribir( "   todo="  );
-	Globales::elPuerto.escribir( major );
-	Globales::elPuerto.escribir( "\n" );
-	*/
+	(*this).laEmisora.emitirAnuncioIBeacon( (*this).beaconUUID, major, valorCO2, (*this).RSSI);
 
 	esperar( tiempoEspera );
 
 	(*this).laEmisora.detenerAnuncio();
-  } // ()
+  } 
 
-  // ............................................................
+  // --------------------------------------------------------------
   // Diseño: R,N,N ---> publicarTemperatura() 
-  // Descripción: Recibe parametros que constituye la carga de ibeacon,
-  // uuid y rssi son constantes, major es el numero combinado de la
-  // constante TEMPERATURA con contador, y minor es el valor de temperatura del sensor
-  // ............................................................
+  // Descripción: Recibe parametros para publicar el valor de temperatura
+  // --------------------------------------------------------------
   void publicarTemperatura( int16_t valorTemperatura,	uint8_t contador, long tiempoEspera ) {
 
 	uint16_t major = (MedicionesID::TEMPERATURA << 8) + contador;
+
 	(*this).laEmisora.emitirAnuncioIBeacon( (*this).beaconUUID, major, valorTemperatura,	(*this).RSSI);
 
 	esperar( tiempoEspera );
 
 	(*this).laEmisora.detenerAnuncio();
-  } // ()
+  } 
 	
-}; // class
-
-// --------------------------------------------------------------
-// --------------------------------------------------------------
-// --------------------------------------------------------------
-// --------------------------------------------------------------
+}; 
 #endif
