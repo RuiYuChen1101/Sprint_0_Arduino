@@ -1,7 +1,7 @@
 // ----------------------------------------------------------
 // Autor: Ruiyu Chen 
 // Descripción: Configura la cabecera del beacon, añadir la
-// carga como uuid,major,minor,txpower y comienza el envío 
+// carga como uuid,major,minor,txpower y comienzo el envío 
 // del anuncio
 // ----------------------------------------------------------
 #ifndef EMISORA_H_INCLUIDO
